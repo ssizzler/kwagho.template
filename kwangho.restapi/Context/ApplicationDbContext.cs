@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace kwangho.restapi.Context
@@ -11,6 +10,7 @@ namespace kwangho.restapi.Context
         { }
 
         public virtual DbSet<ApiUserTokenInfo> ApiUserTokenInfo { get; set; }
+        public virtual DbSet<ApiUser> ApiUser { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

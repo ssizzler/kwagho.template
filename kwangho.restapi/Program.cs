@@ -1,6 +1,7 @@
 using kwangho.restapi.Config;
 using kwangho.restapi.Context;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -22,6 +23,22 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownNetworks.Add(new IPNetwork(IPAddress.Parse("172.16.0.0"), 24));
 });
 #endregion
+
+//Cache 사용이 필요할 경우....
+//개발시  Memory cache 사용
+//운영환경에서는 Redis 등을 사용한다.
+if (builder.Environment.IsProduction())
+{
+    //builder.Services.AddStackExchangeRedisCache(options =>
+    //{
+    //    options.Configuration = builder.Configuration.GetConnectionString("cacheConnString");
+    //    options.InstanceName = "mycache";
+    //});
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
 
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseInMemoryDatabase("AppDb"));
@@ -106,5 +123,34 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHealthChecks("/health");
+
+
+// 아래 코드는 운영환경에서는 사용하지 않음
+// 초기 데이터 설정
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    var passwordHasher = new PasswordHasher<ApiUser>();
+    var adminuser = new ApiUser
+    {
+        UserName = "admin",
+        Name = "Administrator",
+        RegisterDate = DateTime.Now,
+        Active = true
+    };
+    adminuser.PasswordHash = passwordHasher.HashPassword(adminuser, "test!!");
+    var user1 = new ApiUser
+    {
+        UserName = "user1",
+        Name = "User One",
+        RegisterDate = DateTime.Now,
+        Active = true
+    };
+    user1.PasswordHash = passwordHasher.HashPassword(user1, "test!!");
+
+    context.Users.AddRange(adminuser, user1);
+    context.SaveChanges();
+}
 
 app.Run();
