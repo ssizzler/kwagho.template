@@ -1,5 +1,7 @@
 using kwangho.restapi.Config;
+using kwangho.restapi.Context;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Net;
@@ -21,7 +23,8 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 #endregion
 
-// Add services to the container.
+builder.Services.AddDbContext<ApplicationDbContext>(
+    options => options.UseInMemoryDatabase("AppDb"));
 
 builder.Services.AddControllers();
 
@@ -62,8 +65,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+//jwt 토큰 발급자 정보 설정하기 위하여 구성 정보를 가져온다.
 var jwtIssuer = builder.Configuration.GetSection("JwtTokenIssuer").Get<JwtTokenIssuer>();
-
 builder.Services.AddSingleton(jwtIssuer!);
 
 builder.Services.AddAuthentication("Bearer")
