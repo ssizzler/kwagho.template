@@ -40,12 +40,16 @@ else
     builder.Services.AddDistributedMemoryCache();
 }
 
+
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseInMemoryDatabase("AppDb"));
 
-builder.Services.AddControllers();
+//Http Client 지원
+builder.Services.AddHttpClient();
 
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 //swagger UI에서 JWT 인증 토큰을 입력할 수 있도록 설정
 builder.Services.AddSwaggerGen(c =>
 {    
@@ -124,6 +128,7 @@ app.MapControllers();
 
 app.MapHealthChecks("/health");
 
+#region 개발 테스트용
 
 // 아래 코드는 운영환경에서는 사용하지 않음
 // 초기 데이터 설정
@@ -152,5 +157,7 @@ using (var scope = app.Services.CreateScope())
     context.Users.AddRange(adminuser, user1);
     context.SaveChanges();
 }
+#endregion
+
 
 app.Run();

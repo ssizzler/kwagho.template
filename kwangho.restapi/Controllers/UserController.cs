@@ -20,14 +20,14 @@ namespace kwangho.restapi.Controllers
     [Authorize]
     [ApiController]
     [Produces("application/json")]
-    public class MemberController : ControllerBase
+    public class UserController : ControllerBase
     {
         protected readonly ILogger _logger;
 
         private readonly JwtTokenIssuer _apiJwt;
         private readonly ApplicationDbContext _dbContext;
 
-        public MemberController(ILogger<MemberController> logger, JwtTokenIssuer apiJwt, ApplicationDbContext dbContext)
+        public UserController(ILogger<UserController> logger, JwtTokenIssuer apiJwt, ApplicationDbContext dbContext)
         {
             _logger = logger;
 
@@ -95,7 +95,7 @@ namespace kwangho.restapi.Controllers
             };
             _dbContext.ApiUserTokenInfo.Add(refreshTokenInfo);
 
-            //만료된 토큰 제거 (데이터 유지 불필요)
+            //만료된 토큰 제거 (데이터 유지 불필요 시)
             var rmTokens = from m in _dbContext.ApiUserTokenInfo
                            where m.UserName == userName && (m.Used == true || m.Expiress < now)
                            select m;
@@ -105,8 +105,10 @@ namespace kwangho.restapi.Controllers
 
             return token;
         }
-        
+
         #endregion
+
+        #region 토큰 발행
 
         /// <summary>
         /// 인증 및 Access Token 발급
@@ -168,14 +170,14 @@ namespace kwangho.restapi.Controllers
                             where a.UserName == userName && a.RefreshToken == refreshToken
                             && a.Used == false && a.Expiress > now
                             select a;
-                var tokenItem = await query.FirstOrDefaultAsync();
-                if (tokenItem != null)
+                var item = await query.FirstOrDefaultAsync();
+                if (item != null)
                 {
                     //새로고침 토큰이 사용되면 성공/실패 여부 상관없이 만료 한다.
-                    tokenItem.Used = true;
+                    item.Used = true;
                     await _dbContext.SaveChangesAsync();
 
-                    var user = await _dbContext.ApiUser.SingleOrDefaultAsync(m => m.UserName == tokenItem.UserName);
+                    var user = await _dbContext.ApiUser.SingleOrDefaultAsync(m => m.UserName == item.UserName);
                     if (user != null)
                     {
                         return await GenerateJWTToken(user, ipAddr);
@@ -190,5 +192,8 @@ namespace kwangho.restapi.Controllers
             }
             return response;
         }
+
+        #endregion
+
     }
 }
