@@ -15,6 +15,6 @@ JWT Token 인증<br />
 개발 테스트 용으로 RDB는 메모리 데이터베이스를 사용<br />
 
 # 토스 결제 API 호출 
-C#에서 토스 결제 API 호출<br />
+C#에서 토스 결제 API 호출을 위한 레퍼 서비스<br />
 sdk문서: https://docs.tosspayments.com/sdk/v2/js#%EA%B2%B0%EC%A0%9C%EC%B0%BD <br />
 sample: https://github.com/tosspayments/tosspayments-sample/blob/main/express-javascript/public/payment/checkout.html

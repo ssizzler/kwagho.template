@@ -17,7 +17,7 @@ namespace kwangho.tosspay.Models
         /// <summary>
         /// 결제 통화
         /// </summary>
-        public string Currency => "KRW";
+        public string Currency { get; set; } = "KRW";
 
         /// <summary>
         /// 결제 금액
@@ -28,6 +28,7 @@ namespace kwangho.tosspay.Models
     /// <summary>
     /// 결제 수단
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum TossRequestMethod
     {
         CARD,
@@ -41,8 +42,14 @@ namespace kwangho.tosspay.Models
     /// </summary>
     public class TossRequestVirtualAccount
     {
+        /// <summary>
+        /// 에스크로 사용 여부  
+        /// </summary>
         public bool UseEscrow { get; set; } = false;
 
+        /// <summary>
+        /// 가상계좌 입금 만료 시간
+        /// </summary>
         public int ValidHours { get; set; } = 72;
     }
 

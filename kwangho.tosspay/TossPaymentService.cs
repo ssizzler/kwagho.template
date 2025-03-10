@@ -13,7 +13,7 @@ namespace kwangho.tosspay
         private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
-        /// 생성자 (종속성 주입)
+        /// 생성자
         /// </summary>
         /// <param name="barunnConfig"></param>
         /// <param name="pgMertInfos"></param>
