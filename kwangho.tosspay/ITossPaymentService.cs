@@ -13,8 +13,27 @@ namespace kwangho.tosspay
         /// <summary>
         /// 결제 승인 호출
         /// </summary>
-        Task<TossPayment?> ConfirmAsync(TossPostPaymentConfirm requst, string? IdempotencyKey = null);
-        Task<TossPayment?> CancelAsync(string paymentKey, TossPostPaymentCancel postData, string? IdempotencyKey = null);
+        Task<TossPayment?> Confirm(TossPostPaymentConfirm requst, string? IdempotencyKey = null);
+
+        /// <summary>
+        /// 결제 취소
+        /// 결제 취소에 성공했다면 Payment 객체의 cancels 필드에 취소 객체가 배열로 돌아옵니다.
+        /// </summary>
+        Task<TossPayment?> Cancel(string paymentKey, TossPostPaymentCancel postData, string? IdempotencyKey = null);
+
+        /// <summary>
+        /// 승인된 결제를 paymentKey로 조회
+        /// </summary>
+        Task<TossPayment?> GetPayment(string paymentKey);
+
+        /// <summary>
+        /// 승인된 결제를 orderId로 조회
+        /// </summary>
+        Task<TossPayment?> GetPaymentFromOrderId(string orderId);
+
+        /// <summary>
+        /// 클라이언트키
+        /// </summary>
         string ClientKey { get; }
     }
 

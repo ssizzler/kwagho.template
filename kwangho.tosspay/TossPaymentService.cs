@@ -53,7 +53,7 @@ namespace kwangho.tosspay
         /// </summary>
         /// <param name="postData"></param>
         /// <returns></returns>
-        public async Task<TossPayment?> ConfirmAsync(TossPostPaymentConfirm postData, string? IdempotencyKey = null)
+        public async Task<TossPayment?> Confirm(TossPostPaymentConfirm postData, string? IdempotencyKey = null)
         {
             var apiUri = new Uri(_url, "/v1/payments/confirm");
             var httpClient = _httpClientFactory.CreateClient();
@@ -85,7 +85,7 @@ namespace kwangho.tosspay
         /// </summary>
         /// <param name="paymentKey"></param>
         /// <returns></returns>
-        public async Task<TossPayment?> CancelAsync(string paymentKey, TossPostPaymentCancel postData, string? IdempotencyKey = null)
+        public async Task<TossPayment?> Cancel(string paymentKey, TossPostPaymentCancel postData, string? IdempotencyKey = null)
         {
             var apiUri = new Uri(_url, $"/v1/payments/{paymentKey}/cancel");
             var httpClient = _httpClientFactory.CreateClient();
@@ -109,6 +109,53 @@ namespace kwangho.tosspay
                 tossPayment = JsonSerializer.Deserialize<TossPayment>(restr);
             }
 
+            return tossPayment;
+        }
+
+        /// <summary>
+        /// 승인된 결제를 paymentKey로 조회
+        /// </summary>
+        /// <param name="paymentKey"></param>
+        /// <returns></returns>
+        public async Task<TossPayment?> GetPayment(string paymentKey)
+        {
+            var apiUri = new Uri(_url, $"/v1/payments/{paymentKey}");
+            return await GetPayment(apiUri);
+        }
+
+        /// <summary>
+        /// 승인된 결제를 orderId로 조회
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        public async Task<TossPayment?> GetPaymentFromOrderId(string orderId)
+        {
+            var apiUri = new Uri(_url, $"/v1/payments/orders/{orderId}");
+            
+            return await GetPayment(apiUri);
+        }
+
+        /// <summary>
+        /// 승인된 결제 정보 조회
+        /// </summary>
+        /// <param name="apiUri"></param>
+        /// <returns></returns>
+        private async Task<TossPayment?> GetPayment(Uri apiUri)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+            TossPayment? tossPayment = null;
+            using (var request = new HttpRequestMessage())
+            {
+                request.Method = HttpMethod.Get;
+                request.RequestUri = apiUri;
+                request.Headers.Authorization = new AuthenticationHeaderValue("Basic", Base64EncodedAuthenticationString);
+
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var restr = await response.Content.ReadAsStringAsync();
+                tossPayment = JsonSerializer.Deserialize<TossPayment>(restr);
+            }
             return tossPayment;
         }
     }
