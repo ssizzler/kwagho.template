@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kwangho.restapi", "kwangho.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kwangho.context", "kwangho.context\kwangho.context.csproj", "{F4A01EEE-B690-4F65-A119-3A90D0023A64}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kwangho.tosspay", "kwangho.tosspay\kwangho.tosspay.csproj", "{A8305A1C-8B56-41CA-87B2-B47D2FF0259B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{F4A01EEE-B690-4F65-A119-3A90D0023A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4A01EEE-B690-4F65-A119-3A90D0023A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4A01EEE-B690-4F65-A119-3A90D0023A64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8305A1C-8B56-41CA-87B2-B47D2FF0259B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8305A1C-8B56-41CA-87B2-B47D2FF0259B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8305A1C-8B56-41CA-87B2-B47D2FF0259B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8305A1C-8B56-41CA-87B2-B47D2FF0259B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

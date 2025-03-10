@@ -1,5 +1,6 @@
 using kwangho.context;
 using kwangho.restapi.Config;
+using kwangho.tosspay.Models;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,8 @@ else
 
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseInMemoryDatabase("AppDb"));
+
+builder.Services.Configure<TossConfig>(builder.Configuration.GetSection("TossInfo"));
 
 //Http Client Áö¿ø
 builder.Services.AddHttpClient();
