@@ -1,11 +1,9 @@
-﻿using kwangho.restapi.Filters;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
-namespace kwangho.restapi.Context
+namespace kwangho.context
 {
     /// <summary>
     /// 사용자 정보
@@ -59,6 +57,5 @@ namespace kwangho.restapi.Context
         /// </summary>
         public bool Used { get; set; }
     }
-
 
 }

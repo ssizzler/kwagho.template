@@ -1,5 +1,5 @@
-﻿using kwangho.restapi.Config;
-using kwangho.restapi.Context;
+﻿using kwangho.context;
+using kwangho.restapi.Config;
 using kwangho.restapi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -20,19 +20,14 @@ namespace kwangho.restapi.Controllers
     [Authorize]
     [ApiController]
     [Produces("application/json")]
-    public class UserController : ControllerBase
+    public class UserController : BaseController
     {
-        protected readonly ILogger _logger;
-
         private readonly JwtTokenIssuer _apiJwt;
-        private readonly ApplicationDbContext _dbContext;
 
         public UserController(ILogger<UserController> logger, JwtTokenIssuer apiJwt, ApplicationDbContext dbContext)
+            : base(logger, dbContext)
         {
-            _logger = logger;
-
             _apiJwt = apiJwt;
-            _dbContext = dbContext;
         }
 
         #region Private Functions
@@ -42,10 +37,10 @@ namespace kwangho.restapi.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task<ApiUserAcessToken> GenerateJWTToken(ApiUser model, string clientIp)
+        private async Task<ApiUserAcessToken> GenerateJWTToken(ApiUser model)
         {
             var now = DateTimeOffset.UtcNow;
-            var exp = now.AddHours(1);
+            var exp = now.AddHours(_apiJwt.ExpiresHours);  
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_apiJwt.SecretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
             var claims = new[]
@@ -69,7 +64,7 @@ namespace kwangho.restapi.Controllers
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Expires = exp,
                 Created = now,
-                RefreshToken = await GenerateRefreshToken(model.UserName!, clientIp, now),
+                RefreshToken = await GenerateRefreshToken(model.UserName!, now),
                 RefreshTokenExpires = now.AddDays(7)
             };
         }
@@ -81,7 +76,7 @@ namespace kwangho.restapi.Controllers
         /// <param name="clientIp"></param>
         /// <param name="now"></param>
         /// <returns></returns>
-        private async Task<string> GenerateRefreshToken(string userName, string clientIp, DateTimeOffset now)
+        private async Task<string> GenerateRefreshToken(string userName, DateTimeOffset now)
         {
             var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
             var refreshTokenInfo = new ApiUserTokenInfo
@@ -89,8 +84,8 @@ namespace kwangho.restapi.Controllers
                 UserName = userName,
                 Created = now.DateTime,
                 RefreshToken = token,
-                Expiress = now.AddDays(7).DateTime,
-                ClientIp = clientIp,
+                Expiress = now.AddDays(7).DateTime, //새로고침 토큰은 7일간 유효
+                ClientIp = ClientIp ?? "UnKnown",
                 Used = false
             };
             _dbContext.ApiUserTokenInfo.Add(refreshTokenInfo);
@@ -126,7 +121,6 @@ namespace kwangho.restapi.Controllers
             ActionResult response = Unauthorized();
             try
             {
-                var ipAddr = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4()?.ToString() ?? "UnKnown";
                 var user = await _dbContext.ApiUser.SingleOrDefaultAsync(m => m.UserName == userName);
                 var passwordHasher = new PasswordHasher<ApiUser>();
                 if (user != null)
@@ -134,7 +128,7 @@ namespace kwangho.restapi.Controllers
                     var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash!, userPassword);
                     if (result == PasswordVerificationResult.Success)
                     {
-                        return await GenerateJWTToken(user, ipAddr);
+                        return await GenerateJWTToken(user);
                     }
                 }
             }
@@ -163,7 +157,6 @@ namespace kwangho.restapi.Controllers
             ActionResult response = Unauthorized();
             try
             {
-                var ipAddr = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4()?.ToString() ?? "UnKnown";
 
                 var now = DateTime.UtcNow;
                 var query = from a in _dbContext.ApiUserTokenInfo
@@ -180,7 +173,7 @@ namespace kwangho.restapi.Controllers
                     var user = await _dbContext.ApiUser.SingleOrDefaultAsync(m => m.UserName == item.UserName);
                     if (user != null)
                     {
-                        return await GenerateJWTToken(user, ipAddr);
+                        return await GenerateJWTToken(user);
                     }
                 }
                 

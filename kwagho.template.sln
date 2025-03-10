@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "솔루션 항목", "솔루�
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kwangho.restapi", "kwangho.restapi\kwangho.restapi.csproj", "{FD17ECF5-FFBF-4599-9894-A5ED095E6736}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kwangho.context", "kwangho.context\kwangho.context.csproj", "{F4A01EEE-B690-4F65-A119-3A90D0023A64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{FD17ECF5-FFBF-4599-9894-A5ED095E6736}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD17ECF5-FFBF-4599-9894-A5ED095E6736}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD17ECF5-FFBF-4599-9894-A5ED095E6736}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4A01EEE-B690-4F65-A119-3A90D0023A64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4A01EEE-B690-4F65-A119-3A90D0023A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4A01EEE-B690-4F65-A119-3A90D0023A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4A01EEE-B690-4F65-A119-3A90D0023A64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
