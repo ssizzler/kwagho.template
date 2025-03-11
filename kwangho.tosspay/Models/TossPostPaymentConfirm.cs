@@ -22,6 +22,6 @@ namespace kwangho.tosspay.Models
         /// 결제 금액
         /// </summary>
         [JsonPropertyName("amount")]
-        public int Amount { get; set; }
+        public double Amount { get; set; }
     }
 }

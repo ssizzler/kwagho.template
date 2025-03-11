@@ -1,5 +1,6 @@
 using kwangho.context;
 using kwangho.restapi.Config;
+using kwangho.tosspay;
 using kwangho.tosspay.Models;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -46,6 +47,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseInMemoryDatabase("AppDb"));
 
 builder.Services.Configure<TossConfig>(builder.Configuration.GetSection("TossInfo"));
+//Toss 결제 서비스 등록
+builder.Services.AddScoped<ITossPaymentService, TossPaymentService>();
 
 //Http Client 지원
 builder.Services.AddHttpClient();
