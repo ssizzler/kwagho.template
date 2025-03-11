@@ -7,11 +7,12 @@
 ### kwangho.context
 EF Core Context로 DB 연결 및 테이블 생성을 위한 클래스 라이브러리입니다.
 IdentityUser 클래스를 상속받아 사용자 정보를 저장하는 테이블을 생성합니다.
-JWT 새로고침 토큰 정로를 저장 합니다.
+JWT 새로고침 토큰 정보를 저장 합니다.
 
 ### kwangho.restapi
-Rest API 개발 테스트 용으로 RDB는 메모리 데이터베이스를 사용
-JWT Token 인증
+Rest API 개발 테스트 용으로 RDB는 메모리 데이터베이스를 사용<br>
+토스 결제 연습<br>
+JWT Token 인증<br>
 
 ### kwangho.tosspay
 Toss 결제 API 연동을 위한 클래스 라이브러리입니다.

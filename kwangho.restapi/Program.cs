@@ -136,8 +136,7 @@ app.MapHealthChecks("/health");
 
 #region 개발 테스트용
 
-// 아래 코드는 운영환경에서는 사용하지 않음
-// 초기 데이터 설정
+// 아래 코드는 개발 테스트용으로 사용자 정보를 초기화 하기 위한 코드이다.
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

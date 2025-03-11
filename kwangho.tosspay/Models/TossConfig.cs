@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace kwangho.tosspay.Models
+﻿namespace kwangho.tosspay.Models
 {
     /// <summary>
     /// Toss 상점 설정 정보
