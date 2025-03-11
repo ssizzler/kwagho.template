@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.Intrinsics.X86;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -106,7 +107,7 @@ namespace kwangho.restapi.Controllers
         #region 토큰 발행
 
         /// <summary>
-        /// 인증 및 Access Token 발급
+        /// 인증 및 Access Token 생성 발급
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -142,7 +143,7 @@ namespace kwangho.restapi.Controllers
         }
 
         /// <summary>
-        /// 새로 고침 토큰 사용하여 인증 및 Access Token 발급
+        /// 새로 고침 토큰 사용하여 인증 및 Access Token 생성 발급
         /// </summary>
         /// <param name="login"></param>
         /// <returns></returns>
@@ -186,6 +187,68 @@ namespace kwangho.restapi.Controllers
             return response;
         }
 
+        #endregion
+
+        #region 사용자 관리
+
+        /// <summary>
+        /// 사용자 목록
+        /// </summary>
+        /// <returns></returns>
+        [Route("list")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<ActionResult<IEnumerable<UserInfo>>> GetUsers(string? userName = null)
+        {
+            ActionResult response = NoContent();
+
+            var query = from m in _dbContext.ApiUser
+                        select new UserInfo
+                        {
+                            UserName = m.UserName!,
+                            Name = m.Name,
+                            RegisterDate = m.RegisterDate,
+                            Active = m.Active
+                        };
+            if (!string.IsNullOrWhiteSpace(userName))
+                query = query.Where(m => m.UserName == userName);
+
+            var items = await query.ToListAsync();
+            if (items.Count > 0)
+            {
+                response = Ok(items);
+            }
+            return response;
+        }
+
+        /// <summary>
+        /// 사용자 등록
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [Route("create")]
+        [AllowAnonymous]
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public async Task<ActionResult> CreateUser(UserCreate user)
+        {
+            var passwordHasher = new PasswordHasher<ApiUser>();
+            var newUser = new ApiUser
+            {
+                UserName = user.UserName,
+                Name = user.Name,
+                RegisterDate = DateTime.Now,
+                Active = true
+            };
+            newUser.PasswordHash = passwordHasher.HashPassword(newUser, user.Password);
+
+            await _dbContext.Users.AddAsync(newUser);
+            await _dbContext.SaveChangesAsync();
+
+            return Created();
+        }
         #endregion
 
     }
