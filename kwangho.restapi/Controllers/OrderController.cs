@@ -5,6 +5,7 @@ using kwangho.tosspay.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace kwangho.restapi.Controllers
 {
@@ -182,6 +183,61 @@ namespace kwangho.restapi.Controllers
                 response = BadRequest();
             }
             return response;
+        }
+
+        /// <summary>
+        /// 가상계좌 입금 완료시 호출되는 API
+        /// Toss 결제 Callback (WebHook)
+        /// 결제 콜백 경로는 Toss 상점 관리 페이지에 등록해야 호출 가능함
+        /// 등록URL: {도메인URL}/Order/TossPayDepositCallback 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("TossPayDepositCallback")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> TossPayDepositCallback()
+        {
+            try
+            {   //Toss 결제 Callback 처리
+                TossWebHookDeposit? tossData = null;
+                //Request Body 읽기 이상하게 메소드 파라미터로 받으면 값을 못 읽는 경우가 있음.
+                using (var reader = new StreamReader(Request.Body))
+                {
+                    var inputstring = await reader.ReadToEndAsync();
+                    tossData = JsonSerializer.Deserialize<TossWebHookDeposit>(inputstring);
+                }
+                if (tossData != null)
+                {
+                    //등록된 웹훅 URL에 상점과 토스페이먼츠가 아닌 제 3자에 의한 잘못된 요청이 들어올 수 있습니다.
+                    //토스페이먼츠 서버에서 돌아온 올바른 요청이라면 결제 승인 결과로 돌아온 Payment 객체의 secret 값과 가상계좌 웹훅 이벤트 본문으로 돌아온 secret 값이 같습니다.
+                    // TossPayment.Secret == TossWebHookDeposit.Secret
+
+                    var now = DateTime.Now;
+                    if (DateTime.TryParse(tossData.CreatedAt, out DateTime createAt))
+                        now = createAt;
+
+                    //상태별 주문 처리
+                    if (tossData.Status == "DONE") //입금완료
+                    {
+                    }
+                    else if (tossData.Status == "WAITING_FOR_DEPOSIT") //입금대기
+                    {
+                    }
+                    else if (tossData.Status == "CANCELED") //취소
+                    {
+
+                    }
+                    //Toss 결제 Callback 처리 후 응답
+                    return Ok();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ControllerContext.ActionDescriptor.ActionName);
+                
+            }
+            return BadRequest();
         }
     }
 }
