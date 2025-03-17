@@ -2,10 +2,10 @@
 using kwangho.mvc.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using System.Security.Claims;
 
 namespace kwangho.mvc.Controllers
@@ -66,6 +66,17 @@ namespace kwangho.mvc.Controllers
             }
             return View(model);
             
+        }
+
+        /// <summary>
+        /// 로그아웃
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        public new async Task<IActionResult> SignOut()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
         }
     }
 }
