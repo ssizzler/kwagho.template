@@ -7,6 +7,7 @@ using System.Net;
 using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,7 +76,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 //X-Forward heder 사용
@@ -95,5 +95,36 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.MapHealthChecks("/health");
+
+
+#region 개발 테스트용
+
+// 아래 코드는 개발 테스트용으로 사용자 정보를 초기화 하기 위한 코드이다.
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    var passwordHasher = new PasswordHasher<ApiUser>();
+    var adminuser = new ApiUser
+    {
+        UserName = "admin",
+        Name = "Administrator",
+        RegisterDate = DateTime.Now,
+        Active = true
+    };
+    adminuser.PasswordHash = passwordHasher.HashPassword(adminuser, "test!!");
+    var user1 = new ApiUser
+    {
+        UserName = "user1",
+        Name = "User One",
+        RegisterDate = DateTime.Now,
+        Active = true
+    };
+    user1.PasswordHash = passwordHasher.HashPassword(user1, "test!!");
+
+    context.Users.AddRange(adminuser, user1);
+    context.SaveChanges();
+}
+#endregion
 
 app.Run();
