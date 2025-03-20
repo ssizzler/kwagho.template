@@ -10,7 +10,10 @@ namespace kwangho.context
         { }
 
         public virtual DbSet<ApiUserTokenInfo> ApiUserTokenInfo { get; set; }
+
         public virtual DbSet<ApiUser> ApiUser { get; set; }
+
+        public virtual DbSet<NavMemu> NavMemu { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -1,13 +1,14 @@
 using kwangho.context;
-using kwangho.tosspay.Models;
+using kwangho.mvc.Service;
 using kwangho.tosspay;
+using kwangho.tosspay.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Identity;
+using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,9 @@ else
 
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseInMemoryDatabase("AppDb"));
+
+//메뉴 서비스 등록
+builder.Services.AddScoped<NavMenuService>();
 
 builder.Services.Configure<TossConfig>(builder.Configuration.GetSection("TossInfo"));
 //Toss 결제 서비스 등록
@@ -124,7 +128,15 @@ using (var scope = app.Services.CreateScope())
 
     context.Users.AddRange(adminuser, user1);
     context.SaveChanges();
+
+    context.NavMemu.Add(new() { Id = 1, ParentId = 0, SortOrder = 1, Title = "Home", ActionName = "Index", ControllerName = "Home", Disabled=false, Created=DateTime.Now });
+    context.NavMemu.Add(new() { Id = 2, ParentId = 0, SortOrder = 2, Title = "Privacy", ActionName = "Privacy", ControllerName = "Home", Disabled = false, Created = DateTime.Now });
+    context.NavMemu.Add(new() { Id = 3, ParentId = 1, SortOrder = 1, Title = "Home", ActionName = "Index", ControllerName = "Home", Disabled = false, Created = DateTime.Now });
+    context.NavMemu.Add(new() { Id = 4, ParentId = 1, SortOrder = 2, Title = "Privacy", ActionName = "Privacy", ControllerName = "Home", Disabled = false, Created = DateTime.Now });
+
+    context.SaveChanges();
 }
+
 #endregion
 
 app.Run();

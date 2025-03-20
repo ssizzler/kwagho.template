@@ -1,0 +1,75 @@
+﻿@using kwangho.context
+@inject kwangho.mvc.Service.NavMenuService navMenuService;
+@{
+    var navMenu = await navMenuService.GetMenus();
+    var routeData = ViewContext.RouteData.Values;
+    var currentController = (string?)routeData["controller"];
+    var currentAction = (string?)routeData["action"];
+    var currentArea = (string?)routeData["area"];
+
+    //최상위 메뉴
+    var topMenuList = navMenu[0].OrderBy(m => m.SortOrder);
+
+    //뷰에서 메뉴는 2단계만 지원..
+}
+@functions {
+    private async Task submenu(NavMemu parent, IOrderedEnumerable<NavMemu> items, Dictionary<int, List<NavMemu>> navMenu,  string? currentController, string? currentAction, string? currentArea)
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown_@(parent.Id)" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                @parent.Title
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                @foreach (var item in items)
+                {   
+                    string menuClass = "";
+                    @if (string.Equals(item.ActionName, currentAction, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(item.ControllerName, currentController, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(item.AreaName, currentArea, StringComparison.OrdinalIgnoreCase))
+                    {
+                        menuClass = "active";
+                    }
+                    <li>
+                        <a class="dropdown-item @(menuClass)" asp-area="@item.ActionName" asp-controller="@item.ControllerName" asp-action="@item.ActionName">@item.Title</a>
+                    </li>
+                }
+            </ul>
+        </li>
+
+    }
+}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" asp-controller="Home" asp-action="Index">Welcome</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                @foreach (var topMenu in topMenuList)
+                {       
+                    @if (navMenu.ContainsKey(topMenu.Id))
+                    {
+                        var subMenus = navMenu[topMenu.Id].OrderBy(m => m.SortOrder);
+                        await submenu(topMenu, subMenus, navMenu, currentController, currentAction, currentArea);
+                    }
+                    else
+                    {
+                        string menuClass = "";
+                        if (string.Equals(topMenu.ActionName, currentAction, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(topMenu.ControllerName, currentController, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(topMenu.AreaName, currentArea, StringComparison.OrdinalIgnoreCase))
+                        {
+                            menuClass = "active";
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link @(menuClass)" asp-area="@topMenu.ActionName" asp-controller="@topMenu.ControllerName" asp-action="@topMenu.ActionName">@topMenu.Title</a>
+                        </li>
+                    }
+                }
+            </ul>
+            <partial name="_LoginPartial" />
+        </div>
+    </div>
+</nav>
