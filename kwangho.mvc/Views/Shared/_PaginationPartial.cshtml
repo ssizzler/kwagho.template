@@ -1,0 +1,88 @@
+﻿@model PaginationModel
+@{
+    var ShowPrevious = Model.CurrentPage > Model.PaginationCount;
+
+    var firstPage = (ShowPrevious) ? (int)Math.Ceiling(decimal.Divide((Model.CurrentPage - Model.PaginationCount), Model.PaginationCount)) * Model.PaginationCount + 1 : 1;
+    var lastPage = (int)Math.Ceiling(decimal.Divide(Model.CurrentPage, Model.PaginationCount)) * Model.PaginationCount;
+
+    var ShowNext = true;
+
+    if (lastPage >= Model.TotalPages)
+    {
+        ShowNext = false;
+        lastPage = Model.TotalPages;
+    }
+}
+<nav aria-label="...">
+    <ul class="pagination">
+        @if (ShowPrevious)
+        {
+            <li class="page-item">
+                <a class="page-link"
+                   asp-all-route-data="@Model.RouteData"
+                   asp-route-CurrentPage="@(firstPage - 1)"
+                   asp-route-PageSize="@Model.PageSize"
+                   asp-route-PaginationCount="@Model.PaginationCount"
+                   asp-area="@Model.RouteArea"
+                   asp-action="@Model.RouteAction"
+                   asp-controller="@Model.RouteController">
+                   Previous
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Previous</a>
+            </li>
+        }
+        @for (var i = firstPage; i <= lastPage; i++)
+        {
+            if (i == Model.CurrentPage)
+            {
+                <li class="page-item active">
+                    <span class="page-link">
+                        @i
+                        <span class="sr-only">(current)</span>
+                    </span>
+                </li>
+            }
+            else
+            {
+                <li class="page-item">
+                    <a class="page-link"
+                       asp-all-route-data="@Model.RouteData"
+                       asp-route-CurrentPage="@i"
+                       asp-route-PageSize="@Model.PageSize"
+                       asp-route-PaginationCount="@Model.PaginationCount"
+                       asp-area="@Model.RouteArea"
+                       asp-action="@Model.RouteAction"
+                       asp-controller="@Model.RouteController">
+                        @i
+                    </a>
+                </li>
+            }
+        }
+        @if (ShowNext)
+        {
+            <li class="page-item ">
+                <a class="page-link"
+                   asp-all-route-data="@Model.RouteData"
+                   asp-route-CurrentPage="@(lastPage + 1)"
+                   asp-route-PageSize="@Model.PageSize"
+                   asp-route-PaginationCount="@Model.PaginationCount"
+                   asp-area="@Model.RouteArea"
+                   asp-action="@Model.RouteAction"
+                   asp-controller="@Model.RouteController">
+                    Next
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Next</a>
+            </li>
+        }
+    </ul>
+</nav>

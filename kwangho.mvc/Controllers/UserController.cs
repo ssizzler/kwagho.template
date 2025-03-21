@@ -78,5 +78,43 @@ namespace kwangho.mvc.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
+
+        /// <summary>
+        /// 사용자 목록
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [Authorize]
+        public async Task<IActionResult> Users(UserSearch model)
+        {
+            model.RouteController = ControllerContext.ActionDescriptor.ControllerName;
+            model.RouteAction = ControllerContext.ActionDescriptor.ActionName;
+
+            try
+            {
+                var query = from m in _dbContext.ApiUser
+                            where m.Active == true
+                            && (string.IsNullOrEmpty(model.SearchText) || (m.Name != null && m.Name.StartsWith(model.SearchText)) || (m.UserName != null && m.UserName.StartsWith(model.SearchText)))
+                            orderby m.UserName ascending
+                            select new UserInfo
+                            {
+                                UserName = m.UserName!,
+                                Name = m.Name,
+                                RegisterDate = m.RegisterDate,
+                                Active = m.Active
+                            };
+                model.Count = await query.CountAsync();
+
+                //페이지 수 만큼 데이터 읽기
+                query = query.Skip(model.PageFrom).Take(model.PageSize);
+                model.Users = await query.ToListAsync();
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ControllerContext.ActionDescriptor.ActionName);
+            }
+            return View(model);
+        }
     }
 }

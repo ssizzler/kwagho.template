@@ -133,6 +133,7 @@ using (var scope = app.Services.CreateScope())
     context.NavMemu.Add(new() { Id = 2, ParentId = 0, SortOrder = 2, Title = "Privacy", ActionName = "Privacy", ControllerName = "Home", Disabled = false, Created = DateTime.Now });
     context.NavMemu.Add(new() { Id = 3, ParentId = 1, SortOrder = 1, Title = "Home", ActionName = "Index", ControllerName = "Home", Disabled = false, Created = DateTime.Now });
     context.NavMemu.Add(new() { Id = 4, ParentId = 1, SortOrder = 2, Title = "Privacy", ActionName = "Privacy", ControllerName = "Home", Disabled = false, Created = DateTime.Now });
+    context.NavMemu.Add(new() { Id = 5, ParentId = 0, SortOrder = 3, Title = "Users", ActionName = "Users", ControllerName = "User", Disabled = false, Created = DateTime.Now });
 
     context.SaveChanges();
 }

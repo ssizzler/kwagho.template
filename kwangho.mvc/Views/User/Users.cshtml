@@ -1,0 +1,68 @@
+﻿@model UserSearch
+
+@{
+    ViewData["Title"] = "Users";
+}
+<div>
+    <h1>Users</h1>
+    <div class="input-group mb-3">
+        <form class="form-inline my-2 my-lg-0" method="get">
+            <input class="form-control mr-sm-2" type="search" asp-for="SearchText">
+            <button class="btn btn-primary my-2 my-sm-0 mr-sm-2" type="submit">Search</button>
+        </form>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                   Id
+                </th>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Register Date
+                </th>
+                <th>
+                    Active
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Users != null && Model.Users.Count() > 0)
+            {
+                @foreach (var item in Model.Users)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.UserName)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.RegisterDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Active)
+                        </td>
+                    </tr>
+                }
+
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4">No data</td>
+                </tr>
+            }
+        
+        </tbody>
+    </table>
+    @if (Model.Users != null && Model.Users.Count() == 0)
+    {
+        <!-- 페이징 추가 -->
+        <partial name="_PaginationPartial" model="Model" />
+    }
+</div>

@@ -13,7 +13,8 @@
     //뷰에서 메뉴는 2단계만 지원..
 }
 @functions {
-    private async Task submenu(NavMemu parent, IOrderedEnumerable<NavMemu> items, Dictionary<int, List<NavMemu>> navMenu,  string? currentController, string? currentAction, string? currentArea)
+#pragma warning disable 1998
+    async Task submenu(NavMemu parent, IOrderedEnumerable<NavMemu> items, Dictionary<int, List<NavMemu>> navMenu,  string? currentController, string? currentAction, string? currentArea)
     {
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown_@(parent.Id)" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -23,7 +24,7 @@
                 @foreach (var item in items)
                 {   
                     string menuClass = "";
-                    @if (string.Equals(item.ActionName, currentAction, StringComparison.OrdinalIgnoreCase) &&
+                    if (string.Equals(item.ActionName, currentAction, StringComparison.OrdinalIgnoreCase) &&
                         string.Equals(item.ControllerName, currentController, StringComparison.OrdinalIgnoreCase) &&
                         string.Equals(item.AreaName, currentArea, StringComparison.OrdinalIgnoreCase))
                     {
@@ -37,6 +38,7 @@
         </li>
 
     }
+#pragma warning restore 1998
 }
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
