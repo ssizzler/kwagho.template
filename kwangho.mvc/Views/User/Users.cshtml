@@ -6,9 +6,13 @@
 <div>
     <h1>Users</h1>
     <div class="input-group mb-3">
-        <form class="form-inline my-2 my-lg-0" method="get">
-            <input class="form-control mr-sm-2" type="search" asp-for="SearchText">
-            <button class="btn btn-primary my-2 my-sm-0 mr-sm-2" type="submit">Search</button>
+        <form method="get" class="row g-3">
+            <div class="col-auto">
+                <input class="form-control" type="search" asp-for="SearchText">
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </div>
         </form>
     </div>
 
@@ -60,7 +64,7 @@
         
         </tbody>
     </table>
-    @if (Model.Users != null && Model.Users.Count() == 0)
+    @if (Model.Users != null && Model.Users.Count() > 0)
     {
         <!-- 페이징 추가 -->
         <partial name="_PaginationPartial" model="Model" />
