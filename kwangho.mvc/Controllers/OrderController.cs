@@ -1,5 +1,5 @@
 ﻿using kwangho.context;
-using kwangho.restapi.Models;
+using kwangho.mvc.Models;
 using kwangho.tosspay;
 using kwangho.tosspay.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -7,85 +7,39 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
-namespace kwangho.restapi.Controllers
+namespace kwangho.mvc.Controllers
 {
-
     /// <summary>
-    /// 주문 관련 API
+    /// 주문 관련 컨트롤러
     /// </summary>
-    [Route("api/[controller]")]
     [Authorize]
-    [ApiController]
-    [Produces("application/json")]
     public class OrderController : BaseController
     {
         private readonly IDistributedCache _cache;
         private readonly ITossPaymentService _tossPay;
 
-        public OrderController(ILogger<OrderController> logger, ApplicationDbContext dbContext, IDistributedCache cache, ITossPaymentService tossPayment)
-            : base(logger, dbContext)
+        public OrderController(ILogger<OrderController> logger, ApplicationDbContext dbContext, IDistributedCache cache, ITossPaymentService tossPayment) : base(logger, dbContext)
         {
             _cache = cache;
             _tossPay = tossPayment;
         }
 
-        /// <summary>
-        /// 입력된 금액으로 결제 정보를 생성
-        /// </summary>
-        /// <param name="amount">금액</param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("Create")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<OrderPay>> Create(double amount, TossRequestMethod payMethod = TossRequestMethod.CARD)
+        public IActionResult Index()
         {
-            ActionResult response = Unauthorized();
-            try
-            {
-
-                var now = DateTime.UtcNow;
-                var orderid = Guid.NewGuid().ToString();
-                var model = new OrderPay
-                {
-                    TossRequest = new()
-                    {
-                        Method = payMethod,
-                        Amount = new() { Value = amount },
-                        OrderId = orderid[..12],
-                        OrderName = "테스트 주문",
-                        SuccessUrl = Url.ActionLink("TossPaySuccess", "Order")!,//API 프로젝트로 이 경로는 사용할 수 없음, 프론트엔트 경로로 설정해야함.
-                        FailUrl = Url.ActionLink("TossPayFail", "Order")!,      //API 프로젝트로 이 경로는 사용할 수 없음, 프론트엔트 경로로 설정해야함.
-                        CustomerName = User.Identity?.Name
-                    },
-                    IdempotencyKey = orderid
-                };
-                //결제 성공 또는 실패시 주문정보를 찾기 위한 캐시 저장
-                await _cache.SetAsync<OrderPay>(model.IdempotencyKey, model);
-
-                response = Ok(model);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ControllerContext.ActionDescriptor.ActionName);
-                response = BadRequest();
-            }
-            return response;
+            return View();
         }
 
         /// <summary>
-        /// 결제 성공시 호출되는 API
+        /// 결제 성공시 호출
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("TossPaySuccess")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> TossPaySuccess(string paymentType, string paymentKey, string orderId, double amount)
+        public async Task<IActionResult> TossPaySuccess(string paymentType, string paymentKey, string orderId, double amount)
         {
-            ActionResult response = BadRequest();
+            //기본값 실패
+            var action = "TossPayFail";
+            var controller = "Payment";
+
             try
             {
                 //cache 데이터 읽기
@@ -93,7 +47,7 @@ namespace kwangho.restapi.Controllers
                 {
                     //결제 금액 확인 
                     if (orderPayInfo!.TossRequest!.Amount.Value != amount)
-                        return BadRequest("결제 금액 불일치.");
+                        return RedirectToAction(action, controller, new { orderId, code="-1", message = "결제금액불일치" });
 
                     //승인요청
                     var toss = await _tossPay.Confirm(new TossPostPaymentConfirm
@@ -125,36 +79,33 @@ namespace kwangho.restapi.Controllers
                             else
                                 return BadRequest("주문 오류 및 결제 취소 실패");
                         }
-                        
+
                         //완료시 cache 데이터 삭제
                         await _cache.RemoveAsync(orderId);
                         //결제 성공 처리
-                        response = Ok(orderId);
+                        return View(orderPayInfo);
                     }
                     else
-                        return BadRequest("승인요청 실패");
+                        return RedirectToAction(action, controller, new { orderId, code = "-1", message = "승인요청 실패" });
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ControllerContext.ActionDescriptor.ActionName);
-                response = BadRequest();
             }
-            return response;
+            return RedirectToAction(action, controller, new { orderId, code = "-1", message = "결제정보없음" });
         }
 
         /// <summary>
-        /// 결제 실패시 호출되는 API
+        /// 결제 실패시 호출
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [Route("TossPayFail")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> TossPayFail(string code, string message, string orderId)
+        public async Task<IActionResult> TossPayFail(string code, string message, string orderId)
         {
-            ActionResult response = BadRequest();
+            //기본값 실패
+            IActionResult result = RedirectToAction("index", "Home");
             try
             {
                 if (!string.IsNullOrEmpty(code) && !string.IsNullOrEmpty(orderId))
@@ -167,16 +118,15 @@ namespace kwangho.restapi.Controllers
                         //완료시 cache 데이터 삭제
                         await _cache.RemoveAsync(orderId);
 
-                        response = Ok(orderId);
+                        return View();
                     }
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ControllerContext.ActionDescriptor.ActionName);
-                response = BadRequest();
             }
-            return response;
+            return result;
         }
 
         /// <summary>
@@ -187,9 +137,7 @@ namespace kwangho.restapi.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("TossPayDepositCallback")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [AllowAnonymous]
         public async Task<IActionResult> TossPayDepositCallback()
         {
             try
@@ -229,7 +177,7 @@ namespace kwangho.restapi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, ControllerContext.ActionDescriptor.ActionName);
-                
+
             }
             return BadRequest();
         }

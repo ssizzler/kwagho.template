@@ -10,6 +10,9 @@ using System.Security.Claims;
 
 namespace kwangho.mvc.Controllers
 {
+    /// <summary>
+    /// 사용자 관련 컨트롤러
+    /// </summary>
     public class UserController : BaseController
     {
         public UserController(ILogger<UserController> logger, ApplicationDbContext dbContext) : base(logger, dbContext)
