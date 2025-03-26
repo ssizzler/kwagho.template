@@ -142,7 +142,6 @@ namespace kwangho.mvc.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("TossPayFail")]
         public async Task<IActionResult> TossPayFail(string code, string message, string orderId)
         {
             //기본값 실패
