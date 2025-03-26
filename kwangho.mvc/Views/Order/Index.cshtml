@@ -1,0 +1,63 @@
+﻿
+@{
+    ViewData["Title"] = "Order";
+}
+
+<h1>Order</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Process">
+            <div class="mb-3">
+                <label class="form-label">Amount</label>
+                <input type="number" name="amount" class="form-control" value="5000" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Pay</label>
+                <select name="payMethod" class="form-select">
+                    <option value="CARD">신용카드</option>
+                    <option value="VIRTUAL_ACCOUNT">가상 계좌</option>
+                    <option value="TRANSFER">계좌 이체</option>
+                    <option value="MOBILE_PHONE">휴대폰</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <input type="submit" value="Buy" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+<div>
+    <a asp-action="Index" asp-controller="Home">Go to Home</a>
+</div>
+@section Scripts {
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <script>
+        var tossPayments;
+        $(function () {
+            tossPayments = TossPayments("@(ViewBag.CliendId)"); // API 개별 연동 키
+
+            $("form").submit(function (e) {
+                e.preventDefault();
+                let $form = $(this);
+                let url = $(this).attr("action");
+
+                $.ajax({
+                    url: url,
+                    type: $form.attr('method'),
+                    data: $form.serialize(),
+                    contentType: "application/x-www-form-urlencoded"
+                }).done(function (data) {
+                    requestPayment(data.customerKey, data.tossRequest);
+                });
+            });
+
+        });
+
+        async function requestPayment(customerKey, requestModel) {
+            let payment = tossPayments.payment({ customerKey });
+            await payment.requestPayment(requestModel);
+        }
+    </script>
+}

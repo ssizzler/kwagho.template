@@ -24,11 +24,52 @@ namespace kwangho.mvc.Controllers
             _tossPay = tossPayment;
         }
 
+        /// <summary>
+        /// 주문 페이지 
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Index()
         {
+            ViewBag.CliendId = _tossPay.ClientKey;
             return View();
         }
 
+        /// <summary>
+        /// 주문 처리
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<ActionResult<OrderPay>> Process(double amount, TossRequestMethod payMethod = TossRequestMethod.CARD)
+        {
+            var now = DateTime.UtcNow;
+            var orderid = Guid.NewGuid().ToString();
+            try
+            {
+                var model = new OrderPay
+                {
+                    CustomerKey = User.Identity?.Name,
+                    TossRequest = new()
+                    {
+                        Method = payMethod,
+                        Amount = new() { Value = amount },
+                        OrderId = orderid[..12],
+                        OrderName = "테스트 주문",
+                        SuccessUrl = Url.ActionLink("TossPaySuccess", "Order")!,
+                        FailUrl = Url.ActionLink("TossPayFail", "Order")!,
+                        CustomerName = User.Identity?.Name
+                    },
+                    IdempotencyKey = orderid
+                };
+                //결제 성공 또는 실패시 주문정보를 찾기 위한 캐시 저장
+                await _cache.SetAsync<OrderPay>(model.TossRequest.OrderId, model);
+                return model;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ControllerContext.ActionDescriptor.ActionName);
+            }
+            return BadRequest();
+        }
         /// <summary>
         /// 결제 성공시 호출
         /// </summary>
@@ -38,7 +79,7 @@ namespace kwangho.mvc.Controllers
         {
             //기본값 실패
             var action = "TossPayFail";
-            var controller = "Payment";
+            var controller = "Order";
 
             try
             {
@@ -130,7 +171,7 @@ namespace kwangho.mvc.Controllers
         }
 
         /// <summary>
-        /// 가상계좌 입금 완료시 호출되는 API
+        /// 가상계좌 입금 완료시 호출되는
         /// Toss 결제 Callback (WebHook)
         /// 결제 콜백 경로는 Toss 상점 관리 페이지에 등록해야 호출 가능함
         /// 등록URL: {도메인URL}/Order/TossPayDepositCallback 
